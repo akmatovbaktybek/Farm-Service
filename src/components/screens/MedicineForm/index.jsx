@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useSelector } from "react-redux";
-
+import { useSelector, useDispatch } from "react-redux";
+import { refreshAccessToken } from '../../../store/slices/authSlice'; // Путь к файлу с обновлением access token
 
 const MedicationForm = () => {
     const [medications, setMedications] = useState([]);
@@ -11,7 +11,8 @@ const MedicationForm = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
 
-    const token = useSelector(state => state.auth.token);
+    const accessToken = useSelector(state => state.auth.accessToken);
+    const dispatch = useDispatch();
 
     useEffect(() => {
         axios.get('http://34.125.245.208/application/')
@@ -30,7 +31,7 @@ const MedicationForm = () => {
             setQuantity(1);
         }
     };
-    const handleSendOrder = () => {
+    const handleSendOrder = async () => {
         const orderData = {
             total_sum: "calculate this",
             items: selectedMedications.map(item => ({
@@ -39,20 +40,32 @@ const MedicationForm = () => {
             }))
         };
 
-        axios.post('http://34.125.245.208/orders/', orderData, {
-            headers: {
-                Authorization: `Bearer ${token}` // Добавляем токен к заголовку
-            }
-        })
-            .then(response => {
-                setModalVisible(false);
-                setAlertMessage('Успешно');
-            })
-            .catch(error => {
+        try {
+            await axios.post('http://34.125.245.208/orders/', orderData, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}` // Добавляем токен к заголовку
+                }
+            });
+            setModalVisible(false);
+            setAlertMessage('Успешно');
+        } catch (error) {
+            if (error.response && error.response.status === 401) {
+                try {
+                    await dispatch(refreshAccessToken()); // Обновляем access token
+
+                    // Повторно отправляем заказ с новым access token
+                    await handleSendOrder();
+                } catch (refreshError) {
+                    console.error('Error refreshing token:', refreshError);
+                    setAlertMessage('Ошибка');
+                }
+            } else {
                 console.error('Error sending order:', error);
                 setAlertMessage('Ошибка');
-            });
+            }
+        }
     };
+
     const isOrderValid = selectedMedications.length > 0;
 
     return (
@@ -114,7 +127,6 @@ const MedicationForm = () => {
                         {isOrderValid && (
                             <button
                                 className="mt-5 rounded-md bg-lime-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-lime-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-500"
-
                                 type="button" onClick={() => setModalVisible(true)}>
                                 Отправить заказ
                             </button>
@@ -125,22 +137,25 @@ const MedicationForm = () => {
 
 
                     {modalVisible && (
-                        <div className="modal">
-                            <h3>Подвердить заказ</h3>
+                        <div className="modal mt-10">
+                            <h2 className='text-center text-lg font-bold leading-9 tracking-tight text-gray-900'>Подвердить заказ</h2>
                             <ul>
                                 {selectedMedications.map((item, index) => (
                                     <li key={index}>{item.medication.name} - количество: {item.quantity}</li>
                                 ))}
                             </ul>
-                            <button type="button" onClick={handleSendOrder}>Подвердить</button>
-                            <button type="button" onClick={() => setModalVisible(false)}>отменить</button>
+                            <button type="button" onClick={handleSendOrder} className="mt-5 rounded-md bg-lime-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-lime-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-500"
+                            >Подвердить</button>
+
+                            <button type="button" className="mt-5 ml-5 rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-lime-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-500"
+                                onClick={() => setModalVisible(false)}>отменить</button>
 
 
                         </div>
 
                     )}
 
-                    {alertMessage && <div className="alert">{alertMessage}</div>}
+                    {alertMessage && <div className="alert mt-10 text-white p-5 text-center bg-red-600">{alertMessage}</div>}
 
                 </div>
             </div>

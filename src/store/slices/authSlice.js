@@ -1,14 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Async thunk for refreshing the access token
 export const refreshAccessToken = createAsyncThunk(
     'auth/refreshAccessToken',
     async (_, { getState }) => {
         try {
             const refreshToken = getState().auth.refreshToken;
             const response = await axios.post('http://34.125.245.208/account/api/token/refresh/', { refresh: refreshToken });
-
             return response.data.access;
         } catch (error) {
             throw error;
@@ -16,7 +14,6 @@ export const refreshAccessToken = createAsyncThunk(
     }
 );
 
-// Async thunk for logging in
 export const loginAsync = createAsyncThunk(
     'auth/login',
     async (user, { dispatch }) => {
@@ -69,9 +66,16 @@ const authSlice = createSlice({
             })
             .addCase(refreshAccessToken.fulfilled, (state, action) => {
                 state.accessToken = action.payload;
+            })
+            .addCase(refreshAccessToken.rejected, (state, action) => {
+                state.accessToken = null;
+                state.refreshToken = null;
             });
     },
 });
 
 export const { setTokens, setAccessToken } = authSlice.actions;
 export default authSlice.reducer;
+
+export const selectAccessToken = (state) => state.auth.accessToken;
+export const selectRefreshToken = (state) => state.auth.refreshToken;
