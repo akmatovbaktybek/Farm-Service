@@ -1,33 +1,51 @@
-import { Link } from "react-router-dom"
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useForm } from 'react-hook-form';
+import { loginAsync } from '../../../store/slices/authSlice';
+import { useNavigate } from 'react-router-dom'
 
-const SignIn = () => {
+function LoginPage() {
+    const dispatch = useDispatch();
+    const loginStatus = useSelector((state) => state.auth.status);
+    const loginError = useSelector((state) => state.auth.error);
+    const navigate = useNavigate()
+
+    const { handleSubmit, register } = useForm();
+
+    const onSubmit = (data) => {
+        // const formData = {
+        //     navigateToForm: () => navigate('/form'),
+        //     user: data,
+        // }
+        // console.log(formData)
+        dispatch(loginAsync(data));
+    };
+
     return (
         <>
             <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
                 <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-                    {/* <img
-                        className="mx-auto h-10 w-auto"
-                        src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-                        alt="Your Company"
-                    /> */}
                     <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-                        Создать аккаунт
+                        Войдите в свой аккаунт
                     </h2>
+                    <span className="mt-10 text-center text-base  font-normal leading-9 tracking-tight text-gray-900">
+                        С возвращением! Пожалуйста, введите свои данные
+                    </span>
                 </div>
 
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form className="space-y-6" >
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" >
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
-                                Электронная почта
+                                Логин
                             </label>
                             <div className="mt-2">
                                 <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
                                     autoComplete="email"
-                                    required
+                                    {...register('email', {
+                                        required: 'Email is required',
+                                    })}
+
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-lime-500 sm:text-sm sm:leading-6"
                                 />
                             </div>
@@ -42,28 +60,9 @@ const SignIn = () => {
                             <div className="mt-2">
                                 <input
                                     id="password"
-                                    name="password"
                                     type="password"
                                     autoComplete="current-password"
-                                    required
-                                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-lime-500 sm:text-sm sm:leading-6"
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <div className="flex items-center justify-between">
-                                <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
-                                    Подтвердить пароль
-                                </label>
-                            </div>
-                            <div className="mt-2">
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    autoComplete="current-password"
-                                    required
+                                    {...register('password', { required: 'Password is required' })}
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-lime-500 sm:text-sm sm:leading-6"
                                 />
                             </div>
@@ -78,17 +77,10 @@ const SignIn = () => {
                             </button>
                         </div>
                     </form>
-
-                    <p className="mt-10 text-center text-sm text-gray-500">
-                        Еще нет аккаунта?{' '}
-                        <Link to={'/sign-up'} className="font-semibold leading-6 text-lime-500 hover:text-lime-500">
-                            Создать аккаунт
-                        </Link>
-                    </p>
                 </div>
             </div>
         </>
-    )
+    );
 }
 
-export default SignIn
+export default LoginPage;
