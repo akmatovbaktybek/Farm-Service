@@ -14,6 +14,8 @@ const MedicationForm = () => {
     const accessToken = useSelector(state => state.auth.accessToken);
     const dispatch = useDispatch();
 
+    console.log(accessToken, 'accestoken')
+
     useEffect(() => {
         axios.get('http://34.125.245.208/application/')
             .then(response => {
@@ -31,37 +33,34 @@ const MedicationForm = () => {
             setQuantity(1);
         }
     };
-    const handleSendOrder = async () => {
-        const orderData = {
-            total_sum: "calculate this",
-            items: selectedMedications.map(item => ({
-                medicine: item.medication.id,
-                quantity: item.quantity
-            }))
-        };
 
+    const handleSendOrder = async () => {
         try {
+            const orderData = {
+                total_sum: "calculate this",
+                items: selectedMedications.map(item => ({
+                    medicine: item.medication.id,
+                    quantity: item.quantity
+                }))
+            };
+
             await axios.post('http://34.125.245.208/orders/', orderData, {
                 headers: {
-                    Authorization: `Bearer ${accessToken}` // Добавляем токен к заголовку
+                    Authorization: `Bearer ${accessToken}`
                 }
             });
+
             setModalVisible(false);
             setAlertMessage('Успешно');
         } catch (error) {
+            console.error('Error sending order:', error);
+            setAlertMessage('Ошибка');
             if (error.response && error.response.status === 401) {
                 try {
                     await dispatch(refreshAccessToken()); // Обновляем access token
-
-                    // Повторно отправляем заказ с новым access token
-                    await handleSendOrder();
                 } catch (refreshError) {
-                    console.error('Error refreshing token:', refreshError);
-                    setAlertMessage('Ошибка');
+                    console.error('Error refreshing access token:', refreshError);
                 }
-            } else {
-                console.error('Error sending order:', error);
-                setAlertMessage('Ошибка');
             }
         }
     };

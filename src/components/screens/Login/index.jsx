@@ -8,17 +8,19 @@ function LoginPage() {
     const dispatch = useDispatch();
     const loginStatus = useSelector((state) => state.auth.status);
     const loginError = useSelector((state) => state.auth.error);
-    const navigate = useNavigate()
 
     const { handleSubmit, register } = useForm();
 
+    const navigate = useNavigate()
+
+    const navigateToForm = () => {
+        navigate('/medForm')
+    }
+
     const onSubmit = (data) => {
-        // const formData = {
-        //     navigateToForm: () => navigate('/form'),
-        //     user: data,
-        // }
-        // console.log(formData)
+
         dispatch(loginAsync(data));
+        navigateToForm()
     };
 
     return (
