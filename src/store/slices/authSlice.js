@@ -20,11 +20,9 @@ export const loginAsync = createAsyncThunk(
         try {
             const response = await axios.post('http://34.125.245.208/account/api/token/', user);
 
-            // Dispatch action to store tokens in state
+
             dispatch(authSlice.actions.setTokens(response.data.access, response.data.refresh));
 
-            // Continue with the user data and navigation logic
-            // ...
 
             return response.data;
         } catch (error) {
