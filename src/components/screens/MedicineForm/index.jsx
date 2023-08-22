@@ -37,7 +37,6 @@ const MedicationForm = () => {
     const handleSendOrder = async () => {
         try {
             const orderData = {
-                // total_sum: 0,
                 items: selectedMedications.map(item => ({
                     medicine: item.medication.id,
                     quantity: item.quantity
@@ -51,13 +50,14 @@ const MedicationForm = () => {
             });
 
             setModalVisible(false);
-            setAlertMessage('Успешно');
+            setAlertMessage('Успешно отправлено');
+            setSelectedMedications([]);
         } catch (error) {
             console.error('Error sending order:', error);
             setAlertMessage('Ошибка');
             if (error.response && error.response.status === 401) {
                 try {
-                    await dispatch(refreshAccessToken()); // Обновляем access token
+                    await dispatch(refreshAccessToken());
                 } catch (refreshError) {
                     console.error('Error refreshing access token:', refreshError);
                 }
@@ -154,8 +154,11 @@ const MedicationForm = () => {
 
                     )}
 
-                    {alertMessage && <div className="alert mt-10 text-white p-5 text-center bg-red-600">{alertMessage}</div>}
-
+                    {alertMessage && (
+                        <div className={`alert mt-10 text-white p-5 text-center ${alertMessage === 'Успешно отправлено' ? 'bg-lime-500' : 'bg-red-600'}`}>
+                            {alertMessage}
+                        </div>
+                    )}
                 </div>
             </div>
 
