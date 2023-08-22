@@ -37,7 +37,7 @@ const MedicationForm = () => {
     const handleSendOrder = async () => {
         try {
             const orderData = {
-                total_sum: "calculate this",
+                // total_sum: 0,
                 items: selectedMedications.map(item => ({
                     medicine: item.medication.id,
                     quantity: item.quantity
