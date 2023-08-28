@@ -17,7 +17,7 @@ const MedicationForm = () => {
     console.log(accessToken, 'accestoken')
 
     useEffect(() => {
-        axios.get('http://34.125.245.208/application/')
+        axios.get('https://www.farm-service-kg.com/application/')
             .then(response => {
                 setMedications(response.data);
             })
@@ -43,7 +43,7 @@ const MedicationForm = () => {
                 }))
             };
 
-            await axios.post('http://34.125.245.208/orders/', orderData, {
+            await axios.post('https://www.farm-service-kg.com/orders/', orderData, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }

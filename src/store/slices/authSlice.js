@@ -10,7 +10,7 @@ export const refreshAccessToken = createAsyncThunk(
     async (_, { getState, dispatch }) => {
         try {
             const refreshToken = getState().auth.refreshToken;
-            const response = await axios.post('http://34.125.245.208/account/api/token/refresh/', { refresh: refreshToken });
+            const response = await axios.post('https://www.farm-service-kg.com/account/api/token/refresh/', { refresh: refreshToken });
 
             dispatch(setAccessToken(response.data.access));
             localStorage.setItem(TOKEN_STORAGE_KEY, response.data.access);
@@ -26,7 +26,7 @@ export const loginAsync = createAsyncThunk(
     'auth/login',
     async (user, { dispatch }) => {
         try {
-            const response = await axios.post('http://34.125.245.208/account/api/token/', user);
+            const response = await axios.post('https://www.farm-service-kg.com/account/api/token/', user);
 
             dispatch(authSlice.actions.setTokens(response.data.access, response.data.refresh));
             dispatch(authSlice.actions.setUser(response.data.user));

@@ -2,7 +2,7 @@ import axios from "axios";
 import { KEY_TOKEN } from "../utils/constansts/";
 
 export const instance = axios.create({
-    BASE_URL: 'http://34.125.245.208/',
+    BASE_URL: 'https://farm-service-kg.com',
 })
 
 instance.interceptors.request.use((config) => {
