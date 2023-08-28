@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { loginAsync } from '../../../store/slices/authSlice';
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom';
 
 function LoginPage() {
     const dispatch = useDispatch();
@@ -11,16 +11,11 @@ function LoginPage() {
 
     const { handleSubmit, register } = useForm();
 
-    const navigate = useNavigate()
-
-    const navigateToForm = () => {
-        navigate('/medForm')
-    }
+    const navigate = useNavigate();
 
     const onSubmit = (data) => {
-
         dispatch(loginAsync(data));
-        navigateToForm()
+
     };
 
     return (
@@ -79,6 +74,20 @@ function LoginPage() {
                             </button>
                         </div>
                     </form>
+
+                    <div>
+                        {loginStatus === 'succeeded' ? (
+                            <Link to="/medForm">
+                                <button className="mt-10 w-full justify-center rounded-md bg-blue-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500">
+                                    Перейти на главную страницу
+                                </button>
+                            </Link>
+                        ) : loginStatus === 'failed' && (
+                            <button className="mt-10 w-full justify-center rounded-md bg-red-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500">
+                                Ошибка, пользователя не существует либо введены некорректные данные
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         </>
