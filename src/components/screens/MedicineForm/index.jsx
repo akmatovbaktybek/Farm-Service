@@ -256,7 +256,13 @@ const MedicationForm = () => {
                                         Отменить
                                     </button>
                                 </div>
+                                {alertMessage && (
+                                    <div className={`alert mt-10 text-white p-5 text-center ${alertMessage === 'Успешно отправлено' ? 'bg-lime-500' : 'bg-red-600'}`}>
+                                        {alertMessage}
+                                    </div>
+                                )}
                             </div>
+
                         </div>
                     )}
 
