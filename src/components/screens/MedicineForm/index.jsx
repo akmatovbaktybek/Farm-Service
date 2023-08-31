@@ -124,8 +124,8 @@ const MedicationForm = () => {
         }
     };
 
-    const handleRemoveMedication = (indexToRemove) => {
-        const updatedMedications = selectedMedications.filter((_, index) => index !== indexToRemove);
+    const handleRemoveMedication = (medication) => {
+        const updatedMedications = selectedMedications.filter(item => item.medication.id !== medication.id);
         setSelectedMedications(updatedMedications);
     };
 
@@ -202,7 +202,7 @@ const MedicationForm = () => {
                                             </button>
                                             <button
                                                 type="button"
-                                                onClick={() => handleRemoveMedication(item.medication)}
+                                                onClick={() => handleRemoveMedication(item.medication)} // Pass medication object
                                                 className="rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus:ring-red-500 focus:border-red-500"
                                             >
                                                 Удалить
