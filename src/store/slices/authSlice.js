@@ -1,9 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const TOKEN_STORAGE_KEY = 'accessToken'; // Ключ для accessToken в localStorage
-const REFRESH_TOKEN_STORAGE_KEY = 'refreshToken'; // Ключ для refreshToken в localStorage
-const USER_STORAGE_KEY = 'user'; // Ключ для пользователя в localStorage
+const TOKEN_STORAGE_KEY = 'accessToken';
+const REFRESH_TOKEN_STORAGE_KEY = 'refreshToken';
+const USER_STORAGE_KEY = 'user';
 
 export const refreshAccessToken = createAsyncThunk(
     'auth/refreshAccessToken',
@@ -41,6 +41,22 @@ export const loginAsync = createAsyncThunk(
         }
     }
 );
+
+export const logout = createAsyncThunk('auth/logout', async (_, { dispatch }) => {
+    try {
+
+        localStorage.removeItem(TOKEN_STORAGE_KEY);
+        localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
+        localStorage.removeItem(USER_STORAGE_KEY);
+
+        dispatch(authSlice.actions.setTokens({ accessToken: null, refreshToken: null }));
+        dispatch(authSlice.actions.setUser(null));
+
+        return true;
+    } catch (error) {
+        throw error;
+    }
+});
 
 const authSlice = createSlice({
     name: 'auth',
@@ -82,6 +98,11 @@ const authSlice = createSlice({
             .addCase(refreshAccessToken.rejected, (state, action) => {
                 state.accessToken = null;
                 state.refreshToken = null;
+            })
+            .addCase(logout.fulfilled, (state) => {
+                state.accessToken = null;
+                state.refreshToken = null;
+                state.user = null;
             });
     },
 });

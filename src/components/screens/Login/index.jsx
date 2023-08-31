@@ -2,12 +2,12 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { loginAsync } from '../../../store/slices/authSlice';
-import { useNavigate, Link } from 'react-router-dom'; // Изменен импорт
+import { useNavigate, Link } from 'react-router-dom';
 
 function LoginPage() {
     const dispatch = useDispatch();
     const loginStatus = useSelector((state) => state.auth.status);
-    // const loginError = useSelector((state) => state.auth.error);
+
 
     const { handleSubmit, register } = useForm();
 
@@ -19,7 +19,7 @@ function LoginPage() {
 
     useEffect(() => {
         if (loginStatus === 'succeeded') {
-            navigate('/medForm'); // Используем useNavigate
+            navigate('/medForm');
             window.location.reload();
         }
     }, [loginStatus, navigate]);

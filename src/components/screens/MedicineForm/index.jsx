@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
-import { refreshAccessToken } from '../../../store/slices/authSlice';
+import { useNavigate } from 'react-router-dom';
+import { refreshAccessToken, logout } from '../../../store/slices/authSlice';
 
 
 const MedicationForm = () => {
@@ -14,6 +15,7 @@ const MedicationForm = () => {
 
     const accessToken = useSelector(state => state.auth.accessToken);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
 
     console.log(accessToken, 'accestoken')
@@ -127,6 +129,15 @@ const MedicationForm = () => {
     const handleRemoveMedication = (medication) => {
         const updatedMedications = selectedMedications.filter(item => item.medication.id !== medication.id);
         setSelectedMedications(updatedMedications);
+    };
+
+    const handleLogout = async () => {
+        try {
+            await dispatch(logout());
+            navigate('/loginPage');
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
     };
 
 
@@ -273,7 +284,12 @@ const MedicationForm = () => {
                     )}
                 </div>
             </div>
-
+            <button
+                className="mt-5 rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-600 focus:ring-red-500 focus:border-red-500"
+                onClick={handleLogout}
+            >
+                Выйти
+            </button>
         </div>
     );
 };
