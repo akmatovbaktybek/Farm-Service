@@ -18,8 +18,6 @@ const MedicationForm = () => {
     const navigate = useNavigate();
 
 
-    console.log(accessToken, 'accestoken')
-
     useEffect(() => {
         const fetchData = async () => {
             try {
