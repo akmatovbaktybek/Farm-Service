@@ -6,7 +6,7 @@ import MedicationForm from "./components/screens/MedicineForm";
 function App() {
   return (
     <Routes>
-      <Route path="/loginPage" element={<LoginPage />} />
+      <Route path="/" element={<LoginPage />} />
       <Route path="/medForm" element={<MedicationForm />} />
     </Routes>
   );

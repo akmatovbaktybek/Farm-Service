@@ -134,7 +134,7 @@ const MedicationForm = () => {
     const handleLogout = async () => {
         try {
             await dispatch(logout());
-            navigate('/loginPage');
+            navigate('/');
         } catch (error) {
             console.error('Error logging out:', error);
         }
@@ -282,14 +282,16 @@ const MedicationForm = () => {
                             {alertMessage}
                         </div>
                     )}
+
+                    <button
+                        className="mt-5 rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-600 focus:ring-red-500 focus:border-red-500"
+                        onClick={handleLogout}
+                    >
+                        Выйти
+                    </button>
                 </div>
             </div>
-            <button
-                className="mt-5 rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-600 focus:ring-red-500 focus:border-red-500"
-                onClick={handleLogout}
-            >
-                Выйти
-            </button>
+
         </div>
     );
 };
