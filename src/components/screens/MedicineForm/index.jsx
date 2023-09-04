@@ -1,62 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react'; // Удалены неиспользуемые импорты
 import axios from 'axios';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux'; // Удален неиспользуемый импорт useSelector
 import { useNavigate } from 'react-router-dom';
+import AsyncSelect from 'react-select/async';
+
 import { refreshAccessToken, logout } from '../../../store/slices/authSlice';
 
-
 const MedicationForm = () => {
-    const [medications, setMedications] = useState([]);
     const [selectedMedication, setSelectedMedication] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [selectedMedications, setSelectedMedications] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
 
-    const accessToken = useSelector(state => state.auth.accessToken);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const accessToken = useSelector(state => state.auth.accessToken);
 
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                await dispatch(refreshAccessToken());
-                axios.get('https://www.farm-service-kg.com/application/')
-                    .then(response => {
-                        setMedications(response.data);
-                    })
-                    .catch(error => {
-                        console.error('Error fetching medications:', error);
-                    });
-            } catch (refreshError) {
-                console.error('Error refreshing access token:', refreshError);
-            }
-        };
-
-        fetchData();
-    }, [dispatch]);
-
-    const handleSelectMedication = (e) => {
-        const selectedId = parseInt(e.target.value, 10);
-        const selectedMedication = medications.find(med => med.id === selectedId);
-        setSelectedMedication(selectedMedication);
+    const loadOptions = (inputValue, callback) => {
+        axios.get(`https://www.farm-service-kg.com/application/?search=${inputValue}`)
+            .then(response => {
+                const options = response.data.map(med => ({
+                    value: med.id,
+                    label: med.name,
+                }));
+                callback(options);
+            })
+            .catch(error => {
+                console.error('Error fetching medications:', error);
+                callback([]);
+            });
     };
 
     const handleAddCustomMedication = () => {
         if (selectedMedication && quantity > 0) {
-            const existingItem = selectedMedications.find(item => item.medication.id === selectedMedication.id);
-
-            if (existingItem) {
-                const updatedMedications = selectedMedications.map(item => {
-                    if (item.medication.id === selectedMedication.id) {
-                        return {
-                            ...item,
-                            quantity: item.quantity + quantity
-                        };
-                    }
-                    return item;
-                });
+            const existingItemIndex = selectedMedications.findIndex(item => item.medication.value === selectedMedication.value);
+            if (existingItemIndex !== -1) {
+                const updatedMedications = [...selectedMedications];
+                updatedMedications[existingItemIndex].quantity += quantity;
                 setSelectedMedications(updatedMedications);
             } else {
                 setSelectedMedications([...selectedMedications, { medication: selectedMedication, quantity }]);
@@ -69,7 +50,7 @@ const MedicationForm = () => {
 
     const handleIncreaseQuantity = (medication) => {
         const updatedMedications = selectedMedications.map(item => {
-            if (item.medication.id === medication.id) {
+            if (item.medication.value === medication.value) {
                 return {
                     ...item,
                     quantity: item.quantity + 1
@@ -82,7 +63,7 @@ const MedicationForm = () => {
 
     const handleDecreaseQuantity = (medication) => {
         const updatedMedications = selectedMedications.map(item => {
-            if (item.medication.id === medication.id && item.quantity > 1) {
+            if (item.medication.value === medication.value && item.quantity > 1) {
                 return {
                     ...item,
                     quantity: item.quantity - 1
@@ -97,11 +78,12 @@ const MedicationForm = () => {
         try {
             const orderData = {
                 items: selectedMedications.map(item => ({
-                    medicine: item.medication.id,
+                    medicine: item.medication.value,
                     quantity: item.quantity
                 }))
             };
 
+            // Ваш запрос на сервер
             await axios.post('https://www.farm-service-kg.com/orders/', orderData, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
@@ -125,12 +107,13 @@ const MedicationForm = () => {
     };
 
     const handleRemoveMedication = (medication) => {
-        const updatedMedications = selectedMedications.filter(item => item.medication.id !== medication.id);
+        const updatedMedications = selectedMedications.filter(item => item.medication.value !== medication.value);
         setSelectedMedications(updatedMedications);
     };
 
     const handleLogout = async () => {
         try {
+            // Ваш код для выхода из системы
             await dispatch(logout());
             navigate('/');
         } catch (error) {
@@ -138,8 +121,8 @@ const MedicationForm = () => {
         }
     };
 
-
     const isOrderValid = selectedMedications.length > 0;
+
     return (
         <div className="container mx-auto my-10 px-5">
             <h1 className="mt-10 text-center text-3xl font-bold leading-9 tracking-tight text-gray-900">
@@ -153,12 +136,13 @@ const MedicationForm = () => {
                                 Выберите лекарство
                             </label>
                             <div className="mt-2">
-                                <select className="block w-full rounded-md border-gray-300 focus:ring-lime-500 focus:border-lime-500 sm:text-sm" value={selectedMedication ? selectedMedication.id : ''} onChange={handleSelectMedication}>
-                                    <option value="">наименование лекарства</option>
-                                    {medications.map(med => (
-                                        <option key={med.id} value={med.id}>{med.name}</option>
-                                    ))}
-                                </select>
+                                <AsyncSelect
+                                    cacheOptions
+                                    loadOptions={loadOptions}
+                                    defaultOptions
+                                    value={selectedMedication}
+                                    onChange={value => setSelectedMedication(value)}
+                                />
                             </div>
                         </div>
 
@@ -189,10 +173,10 @@ const MedicationForm = () => {
                         <h2 className="text-center text-lg font-bold leading-9 tracking-tight text-gray-900">Выбранные лекарства</h2>
                         <ul>
                             {selectedMedications.map(item => (
-                                <li key={item.medication.id} className="gap-x-6 py-5 px-2 border rounded-md mt-2">
+                                <li key={item.medication.value} className="gap-x-6 py-5 px-2 border rounded-md mt-2">
                                     <div className="flex items-center justify-between  min-w-0 gap-x-4">
                                         <div className="min-w-0 flex-auto">
-                                            <p className="text-sm leading-6 text-gray-900">{item.medication.name} - количество: {item.quantity}</p>
+                                            <p className="text-sm leading-6 text-gray-900">{item.medication.label} - количество: {item.quantity}</p>
                                         </div>
                                         <div className="flex items-center  space-x-1">
                                             <button
@@ -211,13 +195,12 @@ const MedicationForm = () => {
                                             </button>
                                             <button
                                                 type="button"
-                                                onClick={() => handleRemoveMedication(item.medication)} // Pass medication object
+                                                onClick={() => handleRemoveMedication(item.medication)}
                                                 className="rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus:ring-red-500 focus:border-red-500"
                                             >
                                                 Удалить
                                             </button>
                                         </div>
-
                                     </div>
                                 </li>
                             ))}
@@ -242,10 +225,10 @@ const MedicationForm = () => {
                                 </h2>
                                 <ul className="mt-4">
                                     {selectedMedications.map((item, index) => (
-                                        <li key={item.medication.id} className="gap-x-6 py-5 px-2 border rounded-md mt-2">
+                                        <li key={index} className="gap-x-6 py-5 px-2 border rounded-md mt-2">
                                             <div className="flex items-center justify-between  min-w-0 gap-x-4">
                                                 <div className="min-w-0 flex-auto">
-                                                    <p className="text-sm leading-6 text-gray-900">{item.medication.name} - количество: {item.quantity}</p>
+                                                    <p className="text-sm leading-6 text-gray-900">{item.medication.label} - количество: {item.quantity}</p>
                                                 </div>
                                             </div>
                                         </li>
@@ -271,7 +254,6 @@ const MedicationForm = () => {
                                     </div>
                                 )}
                             </div>
-
                         </div>
                     )}
 
@@ -289,7 +271,6 @@ const MedicationForm = () => {
                     </button>
                 </div>
             </div>
-
         </div>
     );
 };
